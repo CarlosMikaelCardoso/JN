@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class TankAdapter(
     private var tanks: List<Tank>,
-    private val onItemClick: (Int) -> Unit
+    private val onItemClick: (Tank) -> Unit
 ) : RecyclerView.Adapter<TankAdapter.TankViewHolder>() {
 
     class TankViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -25,18 +25,19 @@ class TankAdapter(
 
     override fun onBindViewHolder(holder: TankViewHolder, position: Int) {
         val tank = tanks[position]
-
         holder.tankName.text = tank.name
-        holder.itemView.setOnClickListener { onItemClick(position) }
+        holder.itemView.setOnClickListener { onItemClick(tank) }
         holder.typeBreakdownLayout.removeAllViews()
 
-        if (tank.batidas.isEmpty()) {
-            holder.tankTotal.text = "Tanque vazio"
+        // Pega as batidas do dia para este tanque específico
+        val dailyBatidas = TankManager.getBatidasForTank(tank.id)
+
+        if (dailyBatidas.isEmpty()) {
+            holder.tankTotal.text = "Tanque vazio hoje"
         } else {
-            // **AJUSTE AQUI**
-            val allItems = tank.batidas.flatMap { it.items }
+            val allItems = dailyBatidas.flatMap { it.items }
             val totalGeral = allItems.sumOf { it.quantity }
-            holder.tankTotal.text = "Total Geral: %.1f L".format(totalGeral)
+            holder.tankTotal.text = "Total Hoje: %.1f L".format(totalGeral)
 
             val totalsByType = allItems
                 .groupBy { it.type }

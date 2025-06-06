@@ -22,24 +22,37 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewTitle: TextView
 
     // --- Dados ---
+    private var tankId: String? = null
     private var currentTank: Tank? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adicionar_acai)
 
-        val tankIndex = intent.getIntExtra("TANK_INDEX", -1)
-        currentTank = TankManager.getTankAt(tankIndex)
+        // Recebe o ID do tanque, que é uma String.
+        tankId = intent.getStringExtra("TANK_ID")
+        if (tankId == null) {
+            Toast.makeText(this, "Erro: ID do tanque inválido.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
 
+        initializeViews()
+        setupFab()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Busca o tanque pelo ID.
+        currentTank = TankManager.getTankById(tankId!!)
         if (currentTank == null) {
             Toast.makeText(this, "Erro: Tanque não encontrado.", Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        initializeViews()
+        textViewTitle.text = "Histórico do ${currentTank?.name}"
         setupRecyclerViews()
-        setupFab()
     }
 
     private fun initializeViews() {
@@ -50,11 +63,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerViews() {
-        currentTank?.let {
-            historyAdapter = HistoryAdapter(it.batidas)
-            recyclerViewHistory.adapter = historyAdapter
-            recyclerViewHistory.layoutManager = LinearLayoutManager(this)
-        }
+        // Busca as batidas do dia para o tanque atual
+        val dailyBatidas = TankManager.getBatidasForTank(tankId ?: "")
+        historyAdapter = HistoryAdapter(dailyBatidas)
+        recyclerViewHistory.adapter = historyAdapter
+        recyclerViewHistory.layoutManager = LinearLayoutManager(this)
     }
 
     private fun setupFab() {
@@ -111,11 +124,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             val newBatida = Batida(items = ArrayList(currentBatchItemsInDialog))
-            currentTank?.batidas?.add(newBatida)
 
-            // Atualiza a lista de histórico na tela principal
-            historyAdapter.notifyItemInserted(currentTank?.batidas?.size?.minus(1) ?: 0)
-            recyclerViewHistory.scrollToPosition(currentTank?.batidas?.size?.minus(1) ?: 0)
+            // Usa o tankId para adicionar a batida
+            tankId?.let { id ->
+                TankManager.addBatidaToTank(id, newBatida)
+            }
 
             Toast.makeText(this, "Batida salva com sucesso!", Toast.LENGTH_SHORT).show()
             dialog.dismiss()

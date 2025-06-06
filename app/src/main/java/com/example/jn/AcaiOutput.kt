@@ -1,4 +1,6 @@
-package com.example.jn // Substitua pelo seu pacote
+package com.example.jn
 
-// Define a estrutura de uma única saída de açaí.
-data class AcaiOutput(val type: String, val quantity: Double)
+data class AcaiOutput(
+    val type: String = "",
+    val quantity: Double = 0.0
+)

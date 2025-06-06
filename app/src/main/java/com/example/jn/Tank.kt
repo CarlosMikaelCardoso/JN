@@ -1,4 +1,10 @@
-package com.example.jn // Substitua pelo seu pacote
+package com.example.jn
 
-// O Tanque agora armazena uma lista de Batidas, não mais de AcaiOutputs diretamente.
-data class Tank(val name: String, val batidas: MutableList<Batida> = mutableListOf())
+import com.google.firebase.firestore.DocumentId
+
+data class Tank(
+    @DocumentId
+    val id: String = "",
+    val name: String = ""
+    // A lista de batidas foi removida daqui!
+)

@@ -1,4 +1,5 @@
-package com.example.jn // Substitua pelo seu pacote
+package com.example.jn
 
-// Representa uma única batida, que pode conter vários itens.
-data class Batida(val items: List<AcaiOutput>)
+data class Batida(
+    val items: List<AcaiOutput> = emptyList()
+)
