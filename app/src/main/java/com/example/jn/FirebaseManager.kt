@@ -2,6 +2,7 @@ package com.example.jn
 
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.WriteBatch
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import java.text.SimpleDateFormat
@@ -79,5 +80,41 @@ object FirebaseManager {
 
     fun saveDailyRevenue(date: String, revenue: Double) {
         dailyActivityCollection.document(date).update("faturamentoTotal", revenue)
+    }
+
+    // NOVA FUNÇÃO PARA RESETAR A COLEÇÃO DE TANQUES
+    fun resetTanksCollection(onComplete: () -> Unit) {
+        // Pega todos os documentos da coleção 'tanks'
+        tanksCollection.get()
+            .addOnSuccessListener { querySnapshot ->
+                // 1. Inicia uma operação em lote (batch)
+                val batch: WriteBatch = db.batch()
+
+                // 2. Adiciona uma operação de delete para cada tanque existente no lote
+                for (document in querySnapshot) {
+                    batch.delete(document.reference)
+                }
+
+                // 3. Adiciona uma operação de criação para o novo "Tanque 1" no lote
+                val newTank = Tank(name = "Tanque 1")
+                val newTankRef = tanksCollection.document() // Cria uma referência para um novo documento
+                batch.set(newTankRef, newTank)
+
+                // 4. Executa todas as operações (deletes e create) de uma vez só
+                batch.commit()
+                    .addOnSuccessListener {
+                        println("Coleção de tanques resetada com sucesso.")
+                        onComplete()
+                    }
+                    .addOnFailureListener { e ->
+                        println("Erro ao resetar coleção de tanques: ${e.message}")
+                        // Mesmo em caso de falha, chama o onComplete para não travar o app
+                        onComplete()
+                    }
+            }
+            .addOnFailureListener { e ->
+                println("Erro ao buscar tanques para deletar: ${e.message}")
+                onComplete()
+            }
     }
 }

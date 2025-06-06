@@ -70,19 +70,24 @@ object TankManager {
         // 1. Salva o faturamento do dia que está terminando
         FirebaseManager.saveDailyRevenue(oldActiveDay, revenue)
 
-        // 2. Calcula o próximo dia
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val calendar = Calendar.getInstance()
-        calendar.time = sdf.parse(oldActiveDay)!!
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-        val newActiveDay = sdf.format(calendar.time)
+        // 2. CHAMA A NOVA FUNÇÃO PARA RESETAR OS TANQUES
+        FirebaseManager.resetTanksCollection {
+            // Este código só será executado DEPOIS que os tanques forem resetados
 
-        // 3. Atualiza o dia ativo no Firestore
-        FirebaseManager.updateActiveDay(newActiveDay)
+            // 3. Calcula o próximo dia
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val calendar = Calendar.getInstance()
+            calendar.time = sdf.parse(oldActiveDay)!!
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+            val newActiveDay = sdf.format(calendar.time)
 
-        // 4. Recarrega os dados do app para o novo dia
-        loadInitialData {
-            onComplete()
+            // 4. Atualiza o dia ativo no Firestore
+            FirebaseManager.updateActiveDay(newActiveDay)
+
+            // 5. Recarrega todos os dados do app para o novo dia (agora com apenas o Tanque 1)
+            loadInitialData {
+                onComplete()
+            }
         }
     }
 
