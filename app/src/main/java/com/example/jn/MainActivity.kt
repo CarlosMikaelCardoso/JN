@@ -1,31 +1,33 @@
 package com.example.jn
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var spinnerTipoAcai: Spinner
-    private lateinit var spinnerQuantidadeAcai: Spinner
-    private lateinit var buttonAdicionar: Button
-
-    // --- NOVOS COMPONENTES PARA O HISTÓRICO ---
+    // --- Componentes da Tela Principal ---
     private lateinit var recyclerViewHistory: RecyclerView
     private lateinit var historyAdapter: HistoryAdapter
+    private lateinit var fabAddBatch: FloatingActionButton
+    private lateinit var textViewTitle: TextView
+
+    // --- Dados ---
     private var currentTank: Tank? = null
-    // -----------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adicionar_acai)
 
-        // Pega o índice do tanque e o objeto Tank correspondente
         val tankIndex = intent.getIntExtra("TANK_INDEX", -1)
         currentTank = TankManager.getTankAt(tankIndex)
 
@@ -35,73 +37,97 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Inicializa os componentes da UI
-        spinnerTipoAcai = findViewById(R.id.spinnerTipoAcai)
-        spinnerQuantidadeAcai = findViewById(R.id.spinnerQuantidadeAcai)
-        buttonAdicionar = findViewById(R.id.buttonAdicionar)
-        recyclerViewHistory = findViewById(R.id.recyclerViewHistory) // Pega a referência do RecyclerView
-
-        // Popula os Spinners
-        populateTypeSpinner()
-        populateQuantitySpinner()
-
-        // Configura a visualização do histórico
-        setupHistoryView()
-
-        buttonAdicionar.setOnClickListener {
-            addAcaiOutput()
-        }
+        initializeViews()
+        setupRecyclerViews()
+        setupFab()
     }
 
-    // --- NOVO MÉTODO PARA CONFIGURAR O HISTÓRICO ---
-    private fun setupHistoryView() {
-        currentTank?.let { tank ->
-            historyAdapter = HistoryAdapter(tank.outputs)
+    private fun initializeViews() {
+        recyclerViewHistory = findViewById(R.id.recyclerViewHistory)
+        fabAddBatch = findViewById(R.id.fabAddBatch)
+        textViewTitle = findViewById(R.id.textViewTankHistoryTitle)
+        textViewTitle.text = "Histórico do ${currentTank?.name}"
+    }
+
+    private fun setupRecyclerViews() {
+        currentTank?.let {
+            historyAdapter = HistoryAdapter(it.batidas)
             recyclerViewHistory.adapter = historyAdapter
             recyclerViewHistory.layoutManager = LinearLayoutManager(this)
         }
     }
 
-    private fun populateTypeSpinner() {
-        val acaiTypes = TankManager.getAcaiTypes()
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, acaiTypes)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerTipoAcai.adapter = adapter
+    private fun setupFab() {
+        fabAddBatch.setOnClickListener {
+            showAddBatchDialog()
+        }
     }
 
-    private fun populateQuantitySpinner() {
-        val quantidadesAcai = arrayOf("0.5 L", "1.0 L", "1.5 L", "2.0 L", "2.5 L", "3.0 L", "3.5 L", "4.0 L", "4.5 L", "5.0 L")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, quantidadesAcai)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerQuantidadeAcai.adapter = adapter
-    }
+    private fun showAddBatchDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_batch, null)
+        val builder = AlertDialog.Builder(this).setView(dialogView)
+        val dialog = builder.create()
 
-    private fun addAcaiOutput() {
-        val tipoSelecionado = spinnerTipoAcai.selectedItem.toString()
-        val quantidadeSelecionadaString = spinnerQuantidadeAcai.selectedItem.toString()
-        val valorNumerico = quantidadeSelecionadaString.replace(" L", "").toDoubleOrNull()
+        // --- Componentes DENTRO do Diálogo ---
+        val spinnerTipo: Spinner = dialogView.findViewById(R.id.spinnerTipoAcaiDialog)
+        val spinnerQuantidade: Spinner = dialogView.findViewById(R.id.spinnerQuantidadeAcaiDialog)
+        val btnAddItem: Button = dialogView.findViewById(R.id.buttonAddItemDialog)
+        val btnSaveBatch: Button = dialogView.findViewById(R.id.buttonSaveBatchDialog)
+        val btnCancel: Button = dialogView.findViewById(R.id.buttonCancelDialog)
+        val rvCurrentBatch: RecyclerView = dialogView.findViewById(R.id.recyclerViewCurrentBatchDialog)
 
-        if (valorNumerico != null) {
-            currentTank?.let { tank ->
-                val newOutput = AcaiOutput(type = tipoSelecionado, quantity = valorNumerico)
-                tank.outputs.add(newOutput)
+        // --- Lógica DENTRO do Diálogo ---
+        val currentBatchItemsInDialog = mutableListOf<AcaiOutput>()
+        val currentBatchAdapter = CurrentBatchAdapter(currentBatchItemsInDialog)
+        rvCurrentBatch.adapter = currentBatchAdapter
+        rvCurrentBatch.layoutManager = LinearLayoutManager(this)
 
-                // --- ATUALIZAÇÃO EM TEMPO REAL ---
-                // Notifica o adapter que um novo item foi inserido na última posição.
-                historyAdapter.notifyItemInserted(tank.outputs.size - 1)
-                // Rola a lista para que o novo item fique visível.
-                recyclerViewHistory.scrollToPosition(tank.outputs.size - 1)
-                // -----------------------------------
+        // Popula os spinners do diálogo
+        populateSpinner(spinnerTipo, TankManager.getAcaiTypes().toTypedArray())
+        val quantidades = arrayOf("0.5 L", "1.0 L", "1.5 L", "2.0 L", "2.5 L", "3.0 L", "3.5 L", "4.0 L", "4.5 L", "5.0 L")
+        populateSpinner(spinnerQuantidade, quantidades)
 
-                Toast.makeText(this, "Saída adicionada!", Toast.LENGTH_SHORT).show()
+        btnAddItem.setOnClickListener {
+            val tipo = spinnerTipo.selectedItem.toString()
+            val quantidadeStr = spinnerQuantidade.selectedItem.toString()
+            val quantidade = quantidadeStr.replace(" L", "").toDoubleOrNull()
 
-                // MUDANÇA: Não vamos mais fechar a tela automaticamente.
-                // O usuário agora pode adicionar várias saídas e ver o histórico crescer.
-                // finish() // Linha removida!
-
-            } ?: run {
-                Toast.makeText(this, "Erro ao encontrar o tanque.", Toast.LENGTH_SHORT).show()
+            if (quantidade != null && quantidade > 0) {
+                currentBatchItemsInDialog.add(AcaiOutput(tipo, quantidade))
+                currentBatchAdapter.notifyDataSetChanged()
+            } else {
+                Toast.makeText(this, "Selecione uma quantidade válida.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnSaveBatch.setOnClickListener {
+            if (currentBatchItemsInDialog.isEmpty()) {
+                Toast.makeText(this, "Adicione pelo menos um item à batida.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val newBatida = Batida(items = ArrayList(currentBatchItemsInDialog))
+            currentTank?.batidas?.add(newBatida)
+
+            // Atualiza a lista de histórico na tela principal
+            historyAdapter.notifyItemInserted(currentTank?.batidas?.size?.minus(1) ?: 0)
+            recyclerViewHistory.scrollToPosition(currentTank?.batidas?.size?.minus(1) ?: 0)
+
+            Toast.makeText(this, "Batida salva com sucesso!", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    // Função auxiliar para popular qualquer spinner
+    private fun populateSpinner(spinner: Spinner, data: Array<String>) {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, data)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
     }
 }

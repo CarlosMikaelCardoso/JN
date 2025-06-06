@@ -6,4 +6,5 @@
     android:textSize="16sp"
     android:paddingVertical="8dp"
     android:paddingHorizontal="16dp"
-    android:text="• 1.5 L de Açaí Tradicional"/>
+    android:text="• 1.5 L de Açaí Tradicional"
+    android:textColor="@android:color/black"/>

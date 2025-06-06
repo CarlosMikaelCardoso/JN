@@ -31,40 +31,31 @@ class TankListActivity : AppCompatActivity() {
     private lateinit var buttonCalculate: Button
     private lateinit var textViewTotalLiters: TextView
     private lateinit var textViewTotalRevenue: TextView
-    private val summaryRows = mutableListOf<Pair<SummaryActivity.AcaiTypeSummary, View>>()
+    private val summaryRows = mutableListOf<Pair<AcaiTypeSummary, View>>()
+    // Estrutura para guardar o resumo por tipo
+    data class AcaiTypeSummary(val type: String, val totalLiters: Double)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tank_list)
 
-        // Inicializa todos os componentes da UI de ambas as telas
         initializeViews()
-
-        // Configura a tela inicial (lista de tanques)
         setupTankListView()
-
-        // Configura o listener da navegação inferior
         setupBottomNavigation()
     }
 
     override fun onResume() {
         super.onResume()
-        // Este metod será chamado toda vez que a tela voltar ao foco.
-        // Verificamos se a visualização da lista de tanques está ativa.
         if (tanksContentLayout.visibility == View.VISIBLE) {
-            // Se estiver, atualizamos o adaptador com os dados mais recentes do TankManager.
-            // Isso força o RecyclerView a se redesenhar.
             tankAdapter.updateData(TankManager.getTanks())
         }
     }
 
     private fun initializeViews() {
-        // Views da Lista de Tanques
         tanksContentLayout = findViewById(R.id.tanks_content_layout)
         recyclerView = findViewById(R.id.recyclerViewTanks)
         fabAddTank = findViewById(R.id.fabAddTank)
 
-        // Views do Resumo
         summaryContentLayout = findViewById(R.id.summary_content_layout)
         layoutCalculator = findViewById(R.id.layoutRevenueCalculator)
         buttonCalculate = findViewById(R.id.buttonCalculate)
@@ -73,7 +64,6 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun setupTankListView() {
-        // Configura o RecyclerView
         val tanks = TankManager.getTanks()
         tankAdapter = TankAdapter(tanks) { position ->
             val intent = Intent(this, MainActivity::class.java)
@@ -83,7 +73,6 @@ class TankListActivity : AppCompatActivity() {
         recyclerView.adapter = tankAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Configura o clique do botão para adicionar um novo tanque
         fabAddTank.setOnClickListener {
             TankManager.addNewTank()
             tankAdapter.updateData(TankManager.getTanks())
@@ -91,28 +80,26 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun setupSummaryView() {
-        // Limpa dados e views antigas antes de reconstruir
         summaryRows.clear()
         layoutCalculator.removeAllViews()
 
-        val allOutputs = TankManager.getTanks().flatMap { it.outputs }
+        // **AJUSTE AQUI**
+        val allOutputs = TankManager.getTanks().flatMap { it.batidas }.flatMap { it.items }
         val totalLitersOverall = allOutputs.sumOf { it.quantity }
         textViewTotalLiters.text = "Total de Litros Batidos: %.1f L".format(totalLitersOverall)
 
-        // Zera o resultado final ao reabrir a aba
         textViewTotalRevenue.text = "Rendimento Total do Dia: R$ 0.00"
 
         val totalsByType = allOutputs
             .groupBy { it.type }
             .map { (type, outputs) ->
-                SummaryActivity.AcaiTypeSummary(type, outputs.sumOf { it.quantity })
+                AcaiTypeSummary(type, outputs.sumOf { it.quantity })
             }
 
         totalsByType.forEach { summaryData ->
             val rowView = LayoutInflater.from(this).inflate(R.layout.item_summary_row, layoutCalculator, false)
             val typeInfoTextView: TextView = rowView.findViewById(R.id.textViewSummaryTypeInfo)
             typeInfoTextView.text = "${summaryData.type}: %.1f L".format(summaryData.totalLiters)
-
             layoutCalculator.addView(rowView)
             summaryRows.add(Pair(summaryData, rowView))
         }
@@ -145,17 +132,15 @@ class TankListActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.navigation_tanks -> {
                     tanksContentLayout.visibility = View.VISIBLE
-                    fabAddTank.visibility = View.VISIBLE // Mostra o botão de adicionar
+                    fabAddTank.visibility = View.VISIBLE
                     summaryContentLayout.visibility = View.GONE
-                    // Atualiza a lista de tanques caso algo tenha mudado
                     tankAdapter.updateData(TankManager.getTanks())
                     true
                 }
                 R.id.navigation_summary -> {
                     tanksContentLayout.visibility = View.GONE
-                    fabAddTank.visibility = View.GONE // Esconde o botão de adicionar
+                    fabAddTank.visibility = View.GONE
                     summaryContentLayout.visibility = View.VISIBLE
-                    // Prepara a tela de resumo com os dados mais recentes
                     setupSummaryView()
                     true
                 }

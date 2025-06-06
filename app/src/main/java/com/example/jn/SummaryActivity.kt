@@ -44,8 +44,7 @@ class SummaryActivity : AppCompatActivity() {
 
     private fun setupSummaryData() {
         // 1. Pega todas as saídas de todos os tanques
-        val allOutputs = TankManager.getTanks().flatMap { it.outputs }
-
+        val allOutputs = TankManager.getTanks().flatMap { it.batidas }.flatMap { it.items }
         // 2. Calcula o total de litros geral
         val totalLitersOverall = allOutputs.sumOf { it.quantity }
         textViewTotalLiters.text = "Total de Litros Batidos: %.1f L".format(totalLitersOverall)

@@ -1,4 +1,4 @@
-package com.example.jn // Substitua pelo seu pacote
+package com.example.jn
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class HistoryAdapter(private val outputs: List<AcaiOutput>) :
+class HistoryAdapter(private val batidas: List<Batida>) :
     RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -20,10 +20,16 @@ class HistoryAdapter(private val outputs: List<AcaiOutput>) :
     }
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        val output = outputs[position]
-        // Formatamos o texto para exibição
-        holder.textView.text = "• %.1f L de %s".format(output.quantity, output.type)
+        val batida = batidas[position]
+
+        // Constrói a string com todos os itens da batida
+        val itemsString = batida.items.joinToString(separator = "; ") { output ->
+            "%.1f L de %s".format(output.quantity, output.type)
+        }
+
+        // Formata o texto com o número da batida
+        holder.textView.text = "%dª Batida: %s".format(position + 1, itemsString)
     }
 
-    override fun getItemCount() = outputs.size
+    override fun getItemCount() = batidas.size
 }
