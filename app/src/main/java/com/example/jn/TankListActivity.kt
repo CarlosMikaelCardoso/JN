@@ -47,6 +47,17 @@ class TankListActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Este metod será chamado toda vez que a tela voltar ao foco.
+        // Verificamos se a visualização da lista de tanques está ativa.
+        if (tanksContentLayout.visibility == View.VISIBLE) {
+            // Se estiver, atualizamos o adaptador com os dados mais recentes do TankManager.
+            // Isso força o RecyclerView a se redesenhar.
+            tankAdapter.updateData(TankManager.getTanks())
+        }
+    }
+
     private fun initializeViews() {
         // Views da Lista de Tanques
         tanksContentLayout = findViewById(R.id.tanks_content_layout)
