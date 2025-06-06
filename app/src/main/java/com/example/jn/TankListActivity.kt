@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.view.Menu
+import android.view.MenuItem
 
 class TankListActivity : AppCompatActivity() {
 
@@ -53,5 +55,24 @@ class TankListActivity : AppCompatActivity() {
         // Define o adapter e o layout manager para o RecyclerView
         recyclerView.adapter = tankAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    // Este método cria o menu de opções na barra de ferramentas.
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    // Este método é chamado quando um item do menu é selecionado.
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_summary -> {
+                // Abre a SummaryActivity quando o item do menu é clicado.
+                val intent = Intent(this, SummaryActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }

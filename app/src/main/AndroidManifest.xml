@@ -23,5 +23,9 @@
             android:name=".MainActivity"
             android:label="Adicionar Saída de Açaí" />
 
+        <activity
+            android:name=".SummaryActivity"
+            android:label="Resumo do Dia" />
+
     </application>
 </manifest>
