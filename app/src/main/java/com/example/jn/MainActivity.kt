@@ -6,20 +6,30 @@ import android.widget.Button
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var spinnerTipoAcai: Spinner // Novo Spinner para o tipo
+    private lateinit var spinnerTipoAcai: Spinner
     private lateinit var spinnerQuantidadeAcai: Spinner
     private lateinit var buttonAdicionar: Button
-    private var tankIndex: Int = -1
+
+    // --- NOVOS COMPONENTES PARA O HISTÓRICO ---
+    private lateinit var recyclerViewHistory: RecyclerView
+    private lateinit var historyAdapter: HistoryAdapter
+    private var currentTank: Tank? = null
+    // -----------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adicionar_acai)
 
-        tankIndex = intent.getIntExtra("TANK_INDEX", -1)
-        if (tankIndex == -1) {
+        // Pega o índice do tanque e o objeto Tank correspondente
+        val tankIndex = intent.getIntExtra("TANK_INDEX", -1)
+        currentTank = TankManager.getTankAt(tankIndex)
+
+        if (currentTank == null) {
             Toast.makeText(this, "Erro: Tanque não encontrado.", Toast.LENGTH_LONG).show()
             finish()
             return
@@ -29,15 +39,26 @@ class MainActivity : AppCompatActivity() {
         spinnerTipoAcai = findViewById(R.id.spinnerTipoAcai)
         spinnerQuantidadeAcai = findViewById(R.id.spinnerQuantidadeAcai)
         buttonAdicionar = findViewById(R.id.buttonAdicionar)
+        recyclerViewHistory = findViewById(R.id.recyclerViewHistory) // Pega a referência do RecyclerView
 
-        // Popula o Spinner de tipos de açaí
+        // Popula os Spinners
         populateTypeSpinner()
-
-        // Popula o Spinner de quantidades
         populateQuantitySpinner()
+
+        // Configura a visualização do histórico
+        setupHistoryView()
 
         buttonAdicionar.setOnClickListener {
             addAcaiOutput()
+        }
+    }
+
+    // --- NOVO MÉTODO PARA CONFIGURAR O HISTÓRICO ---
+    private fun setupHistoryView() {
+        currentTank?.let { tank ->
+            historyAdapter = HistoryAdapter(tank.outputs)
+            recyclerViewHistory.adapter = historyAdapter
+            recyclerViewHistory.layoutManager = LinearLayoutManager(this)
         }
     }
 
@@ -61,17 +82,24 @@ class MainActivity : AppCompatActivity() {
         val valorNumerico = quantidadeSelecionadaString.replace(" L", "").toDoubleOrNull()
 
         if (valorNumerico != null) {
-            val tank = TankManager.getTankAt(tankIndex)
-            if (tank != null) {
-                // Cria o objeto AcaiOutput com tipo e quantidade
+            currentTank?.let { tank ->
                 val newOutput = AcaiOutput(type = tipoSelecionado, quantity = valorNumerico)
-
-                // Adiciona a nova saída ao tanque
                 tank.outputs.add(newOutput)
 
-                Toast.makeText(this, "$valorNumerico L de $tipoSelecionado adicionado(s) ao ${tank.name}!", Toast.LENGTH_LONG).show()
-                finish()
-            } else {
+                // --- ATUALIZAÇÃO EM TEMPO REAL ---
+                // Notifica o adapter que um novo item foi inserido na última posição.
+                historyAdapter.notifyItemInserted(tank.outputs.size - 1)
+                // Rola a lista para que o novo item fique visível.
+                recyclerViewHistory.scrollToPosition(tank.outputs.size - 1)
+                // -----------------------------------
+
+                Toast.makeText(this, "Saída adicionada!", Toast.LENGTH_SHORT).show()
+
+                // MUDANÇA: Não vamos mais fechar a tela automaticamente.
+                // O usuário agora pode adicionar várias saídas e ver o histórico crescer.
+                // finish() // Linha removida!
+
+            } ?: run {
                 Toast.makeText(this, "Erro ao encontrar o tanque.", Toast.LENGTH_SHORT).show()
             }
         }
