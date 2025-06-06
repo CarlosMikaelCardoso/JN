@@ -10,16 +10,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JN">
 
+        <activity
+            android:name=".TankListActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-
-    <activity
-        android:name=".MainActivity"
-        android:label="Adicionar Saída de Açaí"
-        android:exported="true"> <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-    </intent-filter>
-    </activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="Adicionar Saída de Açaí" />
 
     </application>
 </manifest>
