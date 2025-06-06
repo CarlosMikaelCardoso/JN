@@ -65,17 +65,28 @@ object FirebaseManager {
             .addOnFailureListener { onComplete(null) }
     }
 
-    fun addBatidaToDailyActivity(date: String, tankId: String, batida: Batida) {
+    fun addBatidaToDailyActivity(date: String, tankId: String, tankName: String, batida: Batida) {
         val activityDocument = dailyActivityCollection.document(date)
-        // A chave agora usa "dot notation" para ir até o array correto dentro do mapa
-        val fieldPath = "batidasPorTanque.$tankId"
-        activityDocument.update(fieldPath, FieldValue.arrayUnion(batida))
-            .addOnFailureListener {
-                // Se o update falhar (ex: o campo não existe), usamos set com merge=true
-                activityDocument.set(mapOf(
-                    "batidasPorTanque" to mapOf(tankId to listOf(batida))
-                ), com.google.firebase.firestore.SetOptions.merge())
+
+        // Caminho para o nome do tanque dentro do mapa
+        val namePath = "atividadesPorTanque.$tankId.tankName"
+        // Caminho para a lista de batidas dentro do mapa
+        val batidasPath = "atividadesPorTanque.$tankId.batidas"
+
+        db.runTransaction { transaction ->
+            val doc = transaction.get(activityDocument)
+            // Se o documento do dia ou o campo do tanque ainda não existem, crie-os.
+            if (!doc.exists() || doc.get(namePath) == null) {
+                val newTankActivity = TankActivity(tankName = tankName, batidas = mutableListOf(batida))
+                transaction.set(activityDocument, mapOf("atividadesPorTanque" to mapOf(tankId to newTankActivity)), com.google.firebase.firestore.SetOptions.merge())
+            } else {
+                // Se já existe, apenas adiciona a batida à lista
+                transaction.update(activityDocument, batidasPath, FieldValue.arrayUnion(batida))
             }
+            null
+        }.addOnFailureListener { e ->
+            println("Erro na transação de adicionar batida: ${e.message}")
+        }
     }
 
     fun saveDailyRevenue(date: String, revenue: Double) {

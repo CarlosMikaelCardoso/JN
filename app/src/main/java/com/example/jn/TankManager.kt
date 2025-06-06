@@ -30,7 +30,7 @@ object TankManager {
     fun getTanks(): List<Tank> = tanks
 
     fun getBatidasForTank(tankId: String): List<Batida> {
-        return currentDayActivity?.batidasPorTanque?.get(tankId) ?: emptyList()
+        return currentDayActivity?.atividadesPorTanque?.get(tankId)?.batidas ?: emptyList()
     }
 
     fun getTankById(id: String): Tank? {
@@ -46,22 +46,19 @@ object TankManager {
 
     fun addBatidaToTank(tankId: String, batida: Batida) {
         val activeDay = status?.diaAtivo ?: return
+        val tank = getTankById(tankId) ?: return // Pega o tanque para obter o nome
 
-        // 1. Atualiza o banco de dados no Firebase (isso já estava funcionando)
-        FirebaseManager.addBatidaToDailyActivity(activeDay, tankId, batida)
+        // Passa o nome do tanque para o FirebaseManager
+        FirebaseManager.addBatidaToDailyActivity(activeDay, tankId, tank.name, batida)
 
-        // 2. ATUALIZA O ESTADO LOCAL (A CORREÇÃO PRINCIPAL)
-        // Garante que o objeto de atividade do dia exista
+        // Atualiza o estado local
         if (currentDayActivity == null) {
             currentDayActivity = DailyActivity()
         }
-
-        // Pega a lista de batidas para o tanque específico. Se não existir, cria uma nova.
-        val batidasDoTanque =
-            currentDayActivity!!.batidasPorTanque.getOrPut(tankId) { mutableListOf() }
-
-        // Adiciona a nova batida à lista local
-        batidasDoTanque.add(batida)
+        val tankActivity = currentDayActivity!!.atividadesPorTanque.getOrPut(tankId) {
+            TankActivity(tankName = tank.name)
+        }
+        tankActivity.batidas.add(batida)
     }
 
     fun endDayAndStartNew(revenue: Double, onComplete: () -> Unit) {

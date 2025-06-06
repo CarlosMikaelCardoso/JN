@@ -1,7 +1,7 @@
 package com.example.jn
 
-// Altere o "Map" para "MutableMap" e "List" para "MutableList"
+// O mapa agora guarda um objeto TankActivity para cada ID de tanque
 data class DailyActivity(
-    val batidasPorTanque: MutableMap<String, MutableList<Batida>> = mutableMapOf(),
+    val atividadesPorTanque: MutableMap<String, TankActivity> = mutableMapOf(),
     val faturamentoTotal: Double = 0.0
 )

@@ -37,7 +37,7 @@ class TankListActivity : AppCompatActivity() {
 
     // --- Dados ---
     private val summaryRows = mutableListOf<Pair<AcaiTypeSummary, View>>()
-    private var lastCalculatedRevenue: Double = 0.0 // Variável para guardar o faturamento
+    private var lastCalculatedRevenue: Double = 0.0
 
     data class AcaiTypeSummary(val type: String, val totalLiters: Double)
 
@@ -75,12 +75,6 @@ class TankListActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_summary -> {
-                tanksContentLayout.visibility = View.GONE
-                summaryContentLayout.visibility = View.VISIBLE
-                setupSummaryView()
-                true
-            }
             R.id.action_end_day -> {
                 showEndDayConfirmationDialog()
                 true
@@ -101,9 +95,6 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun showLoading(isLoading: Boolean) {
-        // Implemente um ProgressBar no seu XML com id 'loading_indicator' para usar esta função
-        // val loadingIndicator: ProgressBar = findViewById(R.id.loading_indicator)
-        // loadingIndicator.visibility = if (isLoading) View.VISIBLE else View.GONE
         tanksContentLayout.visibility = if (isLoading) View.GONE else View.VISIBLE
         summaryContentLayout.visibility = View.GONE
     }
@@ -118,10 +109,9 @@ class TankListActivity : AppCompatActivity() {
         recyclerView.adapter = tankAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // AÇÃO DO BOTÃO '+' SIMPLIFICADA
         fabAddTank.setOnClickListener {
             showLoading(true)
-            TankManager.addNewTank { // Chamada correta, sem nome!
+            TankManager.addNewTank {
                 runOnUiThread {
                     tankAdapter.updateData(TankManager.getTanks())
                     showLoading(false)
@@ -130,18 +120,20 @@ class TankListActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getAllOutputsForToday(): List<AcaiOutput> {
         val activity = TankManager.currentDayActivity ?: return emptyList()
-        return activity.batidasPorTanque.values
-            .flatMap { it }
-            .flatMap { it.items }
+        // 1. Acessa a propriedade correta: 'atividadesPorTanque'
+        // 2. Para cada 'tankActivity', pega a sua lista de 'batidas'
+        // 3. Para cada 'batida', pega a sua lista de 'items'
+        return activity.atividadesPorTanque.values
+            .flatMap { tankActivity -> tankActivity.batidas }
+            .flatMap { batida -> batida.items }
     }
 
     private fun setupSummaryView() {
         summaryRows.clear()
         layoutCalculator.removeAllViews()
-        lastCalculatedRevenue = 0.0 // Reseta o cálculo ao abrir a tela
+        lastCalculatedRevenue = 0.0
 
         val allOutputs = getAllOutputsForToday()
         val totalLitersOverall = allOutputs.sumOf { it.quantity }
@@ -176,7 +168,6 @@ class TankListActivity : AppCompatActivity() {
             revenueTextView.text = formatCurrency(revenueForType)
         }
         textViewTotalRevenue.text = "Rendimento Total do Dia: ${formatCurrency(grandTotalRevenue)}"
-        // Guarda o valor calculado para usar no diálogo de "Encerrar Dia"
         lastCalculatedRevenue = grandTotalRevenue
     }
 
@@ -204,23 +195,13 @@ class TankListActivity : AppCompatActivity() {
         }
     }
 
-    // #######################################################
-    // ##         FUNÇÃO CRÍTICA CORRIGIDA ABAIXO           ##
-    // #######################################################
     private fun showEndDayConfirmationDialog() {
-        // Pega o último faturamento calculado na tela de resumo.
-        // O ideal é o usuário ir na tela de resumo e clicar em "Calcular" antes.
         val totalRevenue = lastCalculatedRevenue
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Confirmar Encerramento do Dia")
-        builder.setMessage(
-            "O faturamento total calculado foi de R$ %.2f.\n\nTem certeza que deseja encerrar o dia? Esta ação não pode ser desfeita.".format(
-                totalRevenue
-            )
-        )
+        builder.setMessage("O faturamento total calculado foi de R$ %.2f.\n\nTem certeza que deseja encerrar o dia? Esta ação não pode ser desfeita.".format(totalRevenue))
 
-        // A lógica de encerrar o dia agora está SOMENTE DENTRO do botão "Sim".
         builder.setPositiveButton("Sim, Encerrar") { _, _ ->
             showLoading(true)
             TankManager.endDayAndStartNew(totalRevenue) {

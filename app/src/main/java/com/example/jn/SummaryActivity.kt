@@ -38,38 +38,28 @@ class SummaryActivity : AppCompatActivity() {
         }
     }
 
-    // ##################################################################
-    // ##                  INÍCIO DA LÓGICA CORRIGIDA                  ##
-    // ##################################################################
-
     private fun setupSummaryData() {
         summaryRows.clear()
         layoutCalculator.removeAllViews()
 
-        // 1. Pega a atividade do dia atual do TankManager.
         val activity = TankManager.currentDayActivity
         if (activity == null) {
             textViewTotalLiters.text = "Sem atividade registrada hoje"
             return
         }
+        val allOutputs = activity.atividadesPorTanque.values
+            .flatMap { tankActivity -> tankActivity.batidas }
+            .flatMap { batida -> batida.items }
 
-        // 2. Pega todos os itens (AcaiOutput) de todas as batidas do dia.
-        val allOutputs = activity.batidasPorTanque.values
-            .flatMap { batidasDoTanque -> batidasDoTanque } // Junta as listas de batidas de cada tanque.
-            .flatMap { batida -> batida.items }             // Pega os itens de cada batida.
-
-        // 3. Calcula o total de litros geral (esta parte continua igual).
         val totalLitersOverall = allOutputs.sumOf { it.quantity }
         textViewTotalLiters.text = "Total de Litros Batidos: %.1f L".format(totalLitersOverall)
 
-        // 4. Agrupa por tipo (esta parte continua igual).
         val totalsByType = allOutputs
             .groupBy { it.type }
             .map { (type, outputs) ->
                 AcaiTypeSummary(type, outputs.sumOf { it.quantity })
             }
 
-        // 5. Cria as linhas na UI (esta parte continua igual).
         totalsByType.forEach { summaryData ->
             val inflater = LayoutInflater.from(this)
             val rowView = inflater.inflate(R.layout.item_summary_row, layoutCalculator, false)
@@ -81,7 +71,6 @@ class SummaryActivity : AppCompatActivity() {
             summaryRows.add(Pair(summaryData, rowView))
         }
     }
-
 
     private fun calculateFinalRevenue() {
         var grandTotalRevenue = 0.0
