@@ -24,4 +24,8 @@ object TankManager {
     fun getTankAt(position: Int): Tank? {
         return tanks.getOrNull(position)
     }
+
+    fun getAcaiTypes(): List<String> {
+        return listOf("Açaí Especial", "Açaí Médio", "Açaí Grosso", "Açaí Branco", "Bacaba")
+    }
 }

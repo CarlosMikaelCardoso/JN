@@ -1,46 +1,67 @@
-package com.example.jn // Substitua pelo seu pacote
+package com.example.jn
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class TankAdapter(
     private var tanks: List<Tank>,
-    private val onItemClick: (Int) -> Unit // Função a ser chamada quando um item for clicado
+    private val onItemClick: (Int) -> Unit
 ) : RecyclerView.Adapter<TankAdapter.TankViewHolder>() {
 
-    // ViewHolder: Mantém as referências para os componentes visuais de cada item (evita findViewById repetidos).
+    // ViewHolder agora também tem a referência para o nosso LinearLayout de resumo.
     class TankViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tankName: TextView = view.findViewById(R.id.textViewTankName)
         val tankTotal: TextView = view.findViewById(R.id.textViewTankTotal)
+        val typeBreakdownLayout: LinearLayout = view.findViewById(R.id.layoutTypeBreakdown)
     }
 
-    // Cria um novo ViewHolder (chamado quando o RecyclerView precisa de um novo item visual).
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TankViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_tank, parent, false)
         return TankViewHolder(view)
     }
 
-    // Vincula os dados de um tanque a um ViewHolder.
+    // A lógica principal de exibição é atualizada aqui.
     override fun onBindViewHolder(holder: TankViewHolder, position: Int) {
         val tank = tanks[position]
-        val totalOutput = tank.outputs.sum() // Calcula a soma das saídas
 
         holder.tankName.text = tank.name
-        holder.tankTotal.text = "Total: %.1f L".format(totalOutput)
-
-        // Define o que acontece ao clicar no item.
         holder.itemView.setOnClickListener {
             onItemClick(position)
         }
+
+        // Limpa as views antigas antes de adicionar novas
+        holder.typeBreakdownLayout.removeAllViews()
+
+        if (tank.outputs.isEmpty()) {
+            holder.tankTotal.text = "Tanque vazio"
+        } else {
+            // 1. Calcula o total geral
+            val totalGeral = tank.outputs.sumOf { it.quantity }
+            holder.tankTotal.text = "Total Geral: %.1f L".format(totalGeral)
+
+            // 2. Agrupa as saídas por tipo e soma as quantidades
+            val totalsByType = tank.outputs
+                .groupBy { it.type }
+                .mapValues { entry -> entry.value.sumOf { it.quantity } }
+
+            // 3. Cria uma TextView para cada tipo e adiciona ao layout
+            totalsByType.forEach { (type, total) ->
+                val textView = TextView(holder.itemView.context).apply {
+                    text = "• $type: %.1f L".format(total)
+                    textSize = 14f
+                    setPadding(16, 4, 0, 4) // Adiciona um recuo
+                }
+                holder.typeBreakdownLayout.addView(textView)
+            }
+        }
     }
 
-    // Retorna o número total de itens na lista.
     override fun getItemCount() = tanks.size
 
-    // Função para atualizar a lista de tanques e notificar o RecyclerView.
     fun updateData(newTanks: List<Tank>) {
         tanks = newTanks
         notifyDataSetChanged()

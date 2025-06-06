@@ -5,21 +5,31 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:layout_margin="8dp"
-    android:background="@drawable/item_background"> <TextView
-    android:id="@+id/textViewTankName"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Tanque 1"
-    android:textSize="20sp"
-    android:textColor="@android:color/black"
-    android:textStyle="bold"/>
+    android:background="@drawable/item_background">
+
+    <TextView
+        android:id="@+id/textViewTankName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tanque 1"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/textViewTankTotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total: 0.0 L"
+        android:text="Total Geral: 0.0 L"
         android:textSize="16sp"
-        android:layout_marginTop="4dp"/>
+        android:textStyle="italic"
+        android:layout_marginTop="8dp"/>
+
+    <LinearLayout
+        android:id="@+id/layoutTypeBreakdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp"/>
 
 </LinearLayout>

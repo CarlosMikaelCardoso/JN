@@ -12,11 +12,23 @@
         android:id="@+id/textViewTitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Registrar Saída de Açaí"
-        android:textSize="24sp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="24dp"
-        android:layout_gravity="center_horizontal"/>
+        android:text="Registrar Saída de Açaí"
+        android:textSize="24sp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Selecione o tipo:"
+        android:textSize="18sp"
+        android:layout_marginBottom="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerTipoAcai"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="24dp"/>
     <TextView
         android:id="@+id/textViewLabelSpinner"
         android:layout_width="wrap_content"
