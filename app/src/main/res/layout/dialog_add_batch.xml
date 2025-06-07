@@ -7,11 +7,24 @@
     android:fitsSystemWindows="true">
 
     <TextView
+        android:id="@+id/textViewBatida"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="24dp"
         android:text="Criar Nova Batida"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textViewPedido"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp"
+        android:text="Criar Novo Pedido"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold" />

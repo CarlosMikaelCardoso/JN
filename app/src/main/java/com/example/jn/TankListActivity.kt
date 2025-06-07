@@ -262,6 +262,8 @@ class TankListActivity : AppCompatActivity() {
         subDialogView.findViewById<View>(R.id.buttonSaveBatchDialog).visibility = View.GONE
         subDialogView.findViewById<View>(R.id.recyclerViewCurrentBatchDialog).visibility = View.GONE
         subDialogView.findViewById<View>(R.id.textViewCurrentBatchTitle).visibility = View.GONE
+        subDialogView.findViewById<View>(R.id.textViewBatida).visibility = View.GONE
+        subDialogView.findViewById<View>(R.id.textViewPedido).visibility = View.VISIBLE
 
         val builder = AlertDialog.Builder(this)
             .setView(subDialogView)
