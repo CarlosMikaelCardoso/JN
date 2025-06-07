@@ -1,26 +1,27 @@
 package com.example.jn
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.text.NumberFormat
+import java.util.Calendar
 import java.util.Locale
-import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 
 class TankListActivity : AppCompatActivity() {
 
@@ -79,6 +80,10 @@ class TankListActivity : AppCompatActivity() {
                 showEndDayConfirmationDialog()
                 true
             }
+            R.id.action_change_day -> {
+                showDatePickerDialog()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -95,9 +100,11 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun showLoading(isLoading: Boolean) {
+        findViewById<View>(R.id.loadingIndicator).visibility = if (isLoading) View.VISIBLE else View.GONE
         tanksContentLayout.visibility = if (isLoading) View.GONE else View.VISIBLE
         summaryContentLayout.visibility = View.GONE
     }
+
 
     private fun setupTankListView() {
         val tanks = TankManager.getTanks()
@@ -122,9 +129,6 @@ class TankListActivity : AppCompatActivity() {
 
     private fun getAllOutputsForToday(): List<AcaiOutput> {
         val activity = TankManager.currentDayActivity ?: return emptyList()
-        // 1. Acessa a propriedade correta: 'atividadesPorTanque'
-        // 2. Para cada 'tankActivity', pega a sua lista de 'batidas'
-        // 3. Para cada 'batida', pega a sua lista de 'items'
         return activity.atividadesPorTanque.values
             .flatMap { tankActivity -> tankActivity.batidas }
             .flatMap { batida -> batida.items }
@@ -200,7 +204,7 @@ class TankListActivity : AppCompatActivity() {
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Confirmar Encerramento do Dia")
-        builder.setMessage("O faturamento total calculado foi de R$ %.2f.\n\nTem certeza que deseja encerrar o dia? Esta ação não pode ser desfeita.".format(totalRevenue))
+        builder.setMessage("O faturamento total calculado foi de ${formatCurrency(totalRevenue)}.\n\nTem certeza que deseja encerrar o dia? Esta ação não pode ser desfeita.")
 
         builder.setPositiveButton("Sim, Encerrar") { _, _ ->
             showLoading(true)
@@ -215,5 +219,40 @@ class TankListActivity : AppCompatActivity() {
 
         builder.setNegativeButton("Cancelar", null)
         builder.create().show()
+    }
+
+    private fun showDatePickerDialog() {
+        val activeDay = TankManager.getActiveDay()
+        val parts = activeDay.split("-")
+        val year = parts[0].toInt()
+        val month = parts[1].toInt() - 1 // O mês no DatePickerDialog é baseado em 0 (Janeiro = 0)
+        val day = parts[2].toInt()
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, newYear, newMonth, newDay ->
+                val newDate = String.format("%04d-%02d-%02d", newYear, newMonth + 1, newDay)
+                changeActiveDay(newDate)
+            },
+            year,
+            month,
+            day
+        )
+        datePickerDialog.show()
+    }
+
+    private fun changeActiveDay(newDate: String) {
+        showLoading(true)
+        FirebaseManager.updateActiveDay(newDate)
+        TankManager.loadInitialData {
+            runOnUiThread {
+                tankAdapter.updateData(TankManager.getTanks())
+                supportActionBar?.title = "Dia Ativo: $newDate"
+                if (summaryContentLayout.visibility == View.VISIBLE) {
+                    setupSummaryView()
+                }
+                showLoading(false)
+            }
+        }
     }
 }

@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_change_day"
+        android:title="Mudar Dia"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_end_day"
         android:title="Encerrar Dia"
         android:icon="@android:drawable/ic_menu_save"
