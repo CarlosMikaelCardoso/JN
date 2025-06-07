@@ -3,22 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="20dp"
+    android:fitsSystemWindows="true">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Criar Nova Batida"
-        android:textSize="22sp"
-        android:textStyle="bold"
         android:layout_gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        android:text="Criar Nova Batida"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Selecione o tipo:"
-        android:textSize="16sp"/>
+        android:textColor="@color/black"
+        android:textSize="16sp" />
     <Spinner
         android:id="@+id/spinnerTipoAcaiDialog"
         android:layout_width="match_parent"
@@ -29,7 +32,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Selecione a quantidade (Litros):"
-        android:textSize="16sp"/>
+        android:textColor="@color/black"
+        android:textSize="16sp" />
     <Spinner
         android:id="@+id/spinnerQuantidadeAcaiDialog"
         android:layout_width="match_parent"
@@ -46,8 +50,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Itens nesta batida:"
-        android:layout_marginTop="16dp"/>
+        android:textColor="@color/black" />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCurrentBatchDialog"
         android:layout_width="match_parent"

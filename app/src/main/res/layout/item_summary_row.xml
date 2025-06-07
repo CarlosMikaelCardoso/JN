@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingVertical="8dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:fitsSystemWindows="true">
 
     <TextView
         android:id="@+id/textViewSummaryTypeInfo"
