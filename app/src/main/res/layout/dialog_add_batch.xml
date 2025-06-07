@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="24dp"
         android:text="Criar Nova Batida"
         android:textColor="@color/black"
         android:textSize="22sp"
@@ -26,7 +26,7 @@
         android:id="@+id/spinnerTipoAcaiDialog"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="16dp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -38,7 +38,7 @@
         android:id="@+id/spinnerQuantidadeAcaiDialog"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="24dp"/>
 
     <Button
         android:id="@+id/buttonAddItemDialog"
@@ -48,6 +48,7 @@
         android:text="Adicionar Item"/>
 
     <TextView
+        android:id="@+id/textViewCurrentBatchTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

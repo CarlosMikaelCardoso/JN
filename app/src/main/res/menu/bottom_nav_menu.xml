@@ -5,6 +5,10 @@
         android:icon="@android:drawable/ic_dialog_dialer"
         android:title="Tanques" />
     <item
+        android:id="@+id/navigation_deliveries"
+        android:icon="@android:drawable/ic_menu_directions"
+        android:title="Entregas" />
+    <item
         android:id="@+id/navigation_summary"
         android:icon="@android:drawable/ic_menu_sort_by_size"
         android:title="Resumo" />

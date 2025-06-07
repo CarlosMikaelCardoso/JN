@@ -15,6 +15,8 @@ object FirebaseManager {
     private val tanksCollection = db.collection("tanks")
     private val dailyActivityCollection = db.collection("atividades_diarias")
     private val statusDocument = db.collection("app_status").document("status")
+    private val deliveriesCollection = db.collection("deliveries")
+
 
     // --- Funções de Status ---
     fun getAppStatus(onComplete: (AppStatus?) -> Unit) {
@@ -127,5 +129,23 @@ object FirebaseManager {
                 println("Erro ao buscar tanques para deletar: ${e.message}")
                 onComplete()
             }
+    }
+
+    // NOVA FUNÇÃO para carregar as entregas de uma data específica
+    fun loadDeliveries(date: String, onComplete: (List<Delivery>) -> Unit) {
+        deliveriesCollection.whereEqualTo("date", date).get()
+            .addOnSuccessListener { snapshot ->
+                onComplete(snapshot.toObjects<Delivery>())
+            }
+            .addOnFailureListener {
+                onComplete(emptyList())
+            }
+    }
+
+    // NOVA FUNÇÃO para adicionar uma entrega
+    fun addDelivery(delivery: Delivery, onComplete: (Boolean) -> Unit) {
+        deliveriesCollection.add(delivery)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
 }
