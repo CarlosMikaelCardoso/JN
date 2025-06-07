@@ -130,6 +130,7 @@ class MainActivity : AppCompatActivity() {
                 TankManager.addBatidaToTank(id, newBatida)
             }
 
+            initializeViews()
             Toast.makeText(this, "Batida salva com sucesso!", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }

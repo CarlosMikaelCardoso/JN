@@ -2,9 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:fadingEdge="horizontal"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:fitsSystemWindows="true">
+    android:padding="20dp">
 
     <TextView
         android:id="@+id/textViewBatida"
@@ -19,7 +20,6 @@
 
     <TextView
         android:id="@+id/textViewPedido"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -27,7 +27,8 @@
         android:text="Criar Novo Pedido"
         android:textColor="@color/black"
         android:textSize="22sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -35,11 +36,12 @@
         android:text="Selecione o tipo:"
         android:textColor="@color/black"
         android:textSize="16sp" />
+
     <Spinner
         android:id="@+id/spinnerTipoAcaiDialog"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -47,18 +49,20 @@
         android:text="Selecione a quantidade (Litros):"
         android:textColor="@color/black"
         android:textSize="16sp" />
+
     <Spinner
         android:id="@+id/spinnerQuantidadeAcaiDialog"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="24dp" />
 
     <Button
         android:id="@+id/buttonAddItemDialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:text="Adicionar Item"/>
+        android:hapticFeedbackEnabled="true"
+        android:text="Adicionar Item" />
 
     <TextView
         android:id="@+id/textViewCurrentBatchTitle"
@@ -67,37 +71,39 @@
         android:layout_marginTop="16dp"
         android:text="Itens nesta batida:"
         android:textColor="@color/black" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCurrentBatchDialog"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_marginVertical="8dp"
-        android:background="#F5F5F5"/>
+        android:background="#F5F5F5" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/buttonCancelDialog"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Cancelar"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_marginEnd="8dp"
-            android:textColor="@android:color/black"/>
+            android:textColor="@android:color/black" />
 
         <Button
             android:id="@+id/buttonSaveBatchDialog"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:hapticFeedbackEnabled="true"
             android:text="Salvar Batida"
-            style="?android:attr/buttonBarButtonStyle"
-            android:textColor="@android:color/black"/>
+            android:textColor="@android:color/black" />
     </LinearLayout>
 
 </LinearLayout>

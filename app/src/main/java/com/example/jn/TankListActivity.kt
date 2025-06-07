@@ -130,8 +130,8 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun setupDeliveryListView() {
-        deliveryAdapter = DeliveryAdapter(emptyList()) { delivery ->
-            // TODO: Implementar ação ao clicar em uma entrega
+        deliveryAdapter = DeliveryAdapter(mutableListOf()) { delivery ->
+            showAddDeliveryDialog(delivery)
         }
         recyclerViewDeliveries.adapter = deliveryAdapter
         recyclerViewDeliveries.layoutManager = LinearLayoutManager(this)
@@ -192,12 +192,16 @@ class TankListActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAddDeliveryDialog() {
+    private fun showAddDeliveryDialog(deliveryToEdit: Delivery? = null) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_delivery, null)
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
 
         val currentAcaiItems = mutableListOf<AcaiOutput>()
+        if (deliveryToEdit != null) {
+            currentAcaiItems.addAll(deliveryToEdit.acaiItems)
+        }
+
         val rvAcaiItems: RecyclerView = dialogView.findViewById(R.id.recyclerViewAcaiItems)
         val currentBatchAdapter = CurrentBatchAdapter(currentAcaiItems)
         rvAcaiItems.adapter = currentBatchAdapter
@@ -211,23 +215,45 @@ class TankListActivity : AppCompatActivity() {
             }
         }
 
-        builder.setTitle("Nova Entrega")
+        val clientNameEditText = dialogView.findViewById<EditText>(R.id.editTextClientName)
+        val addressEditText = dialogView.findViewById<EditText>(R.id.editTextAddress)
+        val buildingNameEditText = dialogView.findViewById<EditText>(R.id.editTextBuildingName)
+        val houseNumberEditText = dialogView.findViewById<EditText>(R.id.editTextHouseNumber)
+        val paymentMethodEditText = dialogView.findViewById<EditText>(R.id.editTextPaymentMethod)
+        val tapiocaQtyEditText = dialogView.findViewById<EditText>(R.id.editTextTapioca)
+        val farinhaQtyEditText = dialogView.findViewById<EditText>(R.id.editTextFarinha)
+        val observationEditText = dialogView.findViewById<EditText>(R.id.editTextObservation)
+
+        if (deliveryToEdit != null) {
+            clientNameEditText.setText(deliveryToEdit.clientName)
+            addressEditText.setText(deliveryToEdit.address)
+            buildingNameEditText.setText(deliveryToEdit.buildingName)
+            houseNumberEditText.setText(deliveryToEdit.houseNumber)
+            paymentMethodEditText.setText(deliveryToEdit.paymentMethod)
+            tapiocaQtyEditText.setText(deliveryToEdit.tapiocaQuantity.toString())
+            farinhaQtyEditText.setText(deliveryToEdit.farinhaDaguaQuantity.toString())
+            observationEditText.setText(deliveryToEdit.observation)
+        }
+
+        builder.setTitle(if (deliveryToEdit == null) "Nova Entrega" else "Editar Entrega")
         builder.setPositiveButton("Salvar") { dialog, _ ->
-            val clientName = dialogView.findViewById<EditText>(R.id.editTextClientName).text.toString()
-            val address = dialogView.findViewById<EditText>(R.id.editTextAddress).text.toString()
-            val buildingName = dialogView.findViewById<EditText>(R.id.editTextBuildingName).text.toString()
-            val houseNumber = dialogView.findViewById<EditText>(R.id.editTextHouseNumber).text.toString()
-            val paymentMethod = dialogView.findViewById<EditText>(R.id.editTextPaymentMethod).text.toString()
-            // CORREÇÃO AQUI: Tapioca também é Double
-            val tapiocaQty = dialogView.findViewById<EditText>(R.id.editTextTapioca).text.toString().toIntOrNull() ?: 0
-            val farinhaQty = dialogView.findViewById<EditText>(R.id.editTextFarinha).text.toString().toDoubleOrNull() ?: 0.0
+            val clientName = clientNameEditText.text.toString()
+            val address = addressEditText.text.toString()
+            val buildingName = buildingNameEditText.text.toString()
+            val houseNumber = houseNumberEditText.text.toString()
+            val paymentMethod = paymentMethodEditText.text.toString()
+            val tapiocaQty = tapiocaQtyEditText.text.toString().toIntOrNull() ?: 0
+            val farinhaQty = farinhaQtyEditText.text.toString().toDoubleOrNull() ?: 0.0
+            val observation = observationEditText.text.toString()
 
             if (clientName.isBlank() || address.isBlank() || houseNumber.isBlank() || currentAcaiItems.isEmpty()) {
                 Toast.makeText(this, "Preencha os dados do cliente e adicione ao menos um item de açaí.", Toast.LENGTH_LONG).show()
                 return@setPositiveButton
             }
 
-            val newDelivery = Delivery(
+            // MUDANÇA: Preservando o status 'finished'
+            val delivery = Delivery(
+                id = deliveryToEdit?.id ?: "",
                 clientName = clientName,
                 address = address,
                 buildingName = buildingName.ifEmpty { null },
@@ -236,16 +262,30 @@ class TankListActivity : AppCompatActivity() {
                 acaiItems = currentAcaiItems,
                 tapiocaQuantity = tapiocaQty,
                 farinhaDaguaQuantity = farinhaQty,
-                date = TankManager.getActiveDay()
+                date = TankManager.getActiveDay(),
+                observation = observation,
+                finished = deliveryToEdit?.finished ?: false
             )
 
-            FirebaseManager.addDelivery(newDelivery) { success ->
-                if (success) {
-                    Toast.makeText(this, "Entrega salva!", Toast.LENGTH_SHORT).show()
-                    loadDeliveriesForActiveDay()
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(this, "Erro ao salvar.", Toast.LENGTH_SHORT).show()
+            if (deliveryToEdit == null) {
+                FirebaseManager.addDelivery(delivery) { success ->
+                    if (success) {
+                        Toast.makeText(this, "Entrega salva!", Toast.LENGTH_SHORT).show()
+                        loadDeliveriesForActiveDay()
+                        dialog.dismiss()
+                    } else {
+                        Toast.makeText(this, "Erro ao salvar.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                FirebaseManager.updateDelivery(delivery) { success ->
+                    if (success) {
+                        Toast.makeText(this, "Entrega atualizada!", Toast.LENGTH_SHORT).show()
+                        loadDeliveriesForActiveDay()
+                        dialog.dismiss()
+                    } else {
+                        Toast.makeText(this, "Erro ao atualizar.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -253,11 +293,9 @@ class TankListActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-    // ##### FUNÇÃO AUXILIAR CORRIGIDA #####
     private fun showAddAcaiItemSubDialog(onItemAdded: (AcaiOutput) -> Unit) {
         val subDialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_batch, null)
 
-        // Escondendo os elementos que não precisamos de forma segura
         subDialogView.findViewById<View>(R.id.buttonCancelDialog).visibility = View.GONE
         subDialogView.findViewById<View>(R.id.buttonSaveBatchDialog).visibility = View.GONE
         subDialogView.findViewById<View>(R.id.recyclerViewCurrentBatchDialog).visibility = View.GONE
@@ -273,18 +311,15 @@ class TankListActivity : AppCompatActivity() {
         val spinnerQuantidade: Spinner = subDialogView.findViewById(R.id.spinnerQuantidadeAcaiDialog)
         val btnAddItem: Button = subDialogView.findViewById(R.id.buttonAddItemDialog)
 
-        // Popula os spinners com o novo layout
         val tipos = TankManager.getAcaiTypes().toTypedArray()
         val quantidades = arrayOf("0.5 L", "1.0 L", "1.5 L", "2.0 L", "2.5 L", "3.0 L", "3.5 L", "4.0 L", "4.5 L", "5.0 L")
 
-        // Adapter para o tipo de açaí
         val tipoAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tipos)
-        tipoAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item) // <-- MUDANÇA AQUI
+        tipoAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
         spinnerTipo.adapter = tipoAdapter
 
-        // Adapter para a quantidade
         val quantidadeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, quantidades)
-        quantidadeAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item) // <-- MUDANÇA AQUI
+        quantidadeAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
         spinnerQuantidade.adapter = quantidadeAdapter
 
         val dialog = builder.create()
@@ -302,7 +337,6 @@ class TankListActivity : AppCompatActivity() {
                 Toast.makeText(this, "Selecione uma quantidade válida.", Toast.LENGTH_SHORT).show()
             }
         }
-
         dialog.show()
     }
 

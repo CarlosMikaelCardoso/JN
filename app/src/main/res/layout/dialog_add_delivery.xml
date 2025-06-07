@@ -16,25 +16,47 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/black"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nome do Cliente" style="@style/TextAppearance.AppCompat.Caption"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nome do Cliente"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@color/black"/>
+
         <EditText
             android:id="@+id/editTextClientName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName|textCapWords"
-            android:hint="Nome do Cliente"/>
+            android:hint="Nome do Cliente"
+            android:textColor="@color/black"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Endereço (Rua, Bairro)" style="@style/TextAppearance.AppCompat.Caption" android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Endereço (Rua, Bairro)"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
         <EditText
             android:id="@+id/editTextAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPostalAddress"
-            android:hint="Ex: Rua dos Açaizeiros, Guamá"/>
+            android:hint="Ex: Rua dos Açaizeiros, Guamá"
+            />
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nome do Prédio/Condomínio (Opcional)" style="@style/TextAppearance.AppCompat.Caption" android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nome do Prédio/Condomínio (Opcional)"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
         <EditText
             android:id="@+id/editTextBuildingName"
             android:layout_width="match_parent"
@@ -42,7 +64,14 @@
             android:inputType="text"
             android:hint="Ex: Condomínio do Açaí"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Número da Casa / Apto" style="@style/TextAppearance.AppCompat.Caption" android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Número da Casa / Apto"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
         <EditText
             android:id="@+id/editTextHouseNumber"
             android:layout_width="match_parent"
@@ -50,7 +79,14 @@
             android:inputType="text"
             android:hint="Ex: 123 ou Bloco A, Apto 404"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Forma de Pagamento" style="@style/TextAppearance.AppCompat.Caption" android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forma de Pagamento"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
         <EditText
             android:id="@+id/editTextPaymentMethod"
             android:layout_width="match_parent"
@@ -68,7 +104,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Itens de Açaí"
-            style="@style/TextAppearance.AppCompat.Caption"/>
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@color/black"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewAcaiItems"
@@ -86,7 +123,14 @@
             android:layout_gravity="end"
             android:layout_marginTop="8dp"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tapioca" style="@style/TextAppearance.AppCompat.Caption" android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tapioca"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
         <EditText
             android:id="@+id/editTextTapioca"
             android:layout_width="match_parent"
@@ -94,13 +138,35 @@
             android:inputType="numberDecimal"
             android:hint="0"/>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Farinha d'água (Kg)" style="@style/TextAppearance.AppCompat.Caption" android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Farinha d'água (Kg)"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
         <EditText
             android:id="@+id/editTextFarinha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
             android:hint="0.0"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Observação"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
+        <EditText
+            android:id="@+id/editTextObservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:hint="Alguma observação sobre o pedido?"/>
 
     </LinearLayout>
 </ScrollView>

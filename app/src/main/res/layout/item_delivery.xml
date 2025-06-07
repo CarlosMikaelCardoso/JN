@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:layout_margin="8dp"
+    android:id="@+id/delivery_item_layout"
     android:background="@drawable/item_background">
 
     <TextView
@@ -21,17 +22,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Endereço Completo"
-        android:textSize="16sp"
-        android:layout_marginTop="8dp"/>
+        android:textSize="20sp"
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/black"/>
 
     <TextView
         android:id="@+id/textViewPaymentMethod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Forma de Pagamento: PIX"
-        android:textSize="14sp"
+        android:textSize="18sp"
         android:textStyle="italic"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/black"/>
 
     <View
         android:layout_width="match_parent"
@@ -43,7 +46,26 @@
         android:id="@+id/textViewOrderItems"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="• Açaí: 1.0 L\n• Tapioca: 0.5 kg\n• Farinha: 0.2 kg"
-        android:textSize="16sp"/>
+        android:text="•: 1.0 L\n• Tapioca: 0.5 kg\n• Farinha: 0.2 kg"
+        android:textSize="16sp"
+        android:textColor="#371966"/>
+
+    <TextView
+        android:id="@+id/textViewObservation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Observação"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/buttonMarkAsFinished"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Marcar como Entregue"
+        android:layout_gravity="end"
+        android:layout_marginTop="12dp"/>
 
 </LinearLayout>

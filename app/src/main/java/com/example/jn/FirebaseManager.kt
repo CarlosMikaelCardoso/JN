@@ -148,4 +148,11 @@ object FirebaseManager {
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
+
+    // NOVA FUNÇÃO para atualizar uma entrega
+    fun updateDelivery(delivery: Delivery, onComplete: (Boolean) -> Unit) {
+        deliveriesCollection.document(delivery.id).set(delivery)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
 }

@@ -39,8 +39,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
+        android:contentDescription="Adicionar nova batida"
+        android:hapticFeedbackEnabled="true"
         android:src="@android:drawable/ic_input_add"
-        app:tint="@android:color/white"
-        android:contentDescription="Adicionar nova batida" />
+        app:tint="@android:color/white" />
 
 </RelativeLayout>
