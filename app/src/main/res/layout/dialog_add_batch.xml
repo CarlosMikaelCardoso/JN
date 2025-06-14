@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fadingEdge="horizontal"
     android:fitsSystemWindows="true"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/textViewBatida"
@@ -17,7 +16,6 @@
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold" />
-
     <TextView
         android:id="@+id/textViewPedido"
         android:layout_width="wrap_content"
@@ -29,7 +27,6 @@
         android:textSize="22sp"
         android:textStyle="bold"
         android:visibility="gone" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,11 +34,21 @@
         android:textColor="@color/black"
         android:textSize="16sp" />
 
-    <Spinner
-        android:id="@+id/spinnerTipoAcaiDialog"
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupTipoAcai"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:singleSelection="true"
+        app:flexWrap="wrap">
+
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Açaí Popular"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Açaí Médio"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Açaí Grosso"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Açaí Branco"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bacaba"/>
+    </com.google.android.material.chip.ChipGroup>
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -50,11 +57,25 @@
         android:textColor="@color/black"
         android:textSize="16sp" />
 
-    <Spinner
-        android:id="@+id/spinnerQuantidadeAcaiDialog"
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupQuantidade"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="24dp" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:singleSelection="true"
+        app:flexWrap="wrap">
+
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0.5 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1.0 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1.5 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2.0 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2.5 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.0 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.5 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4.0 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4.5 L"/>
+        <com.google.android.material.chip.Chip style="@style/Widget.App.ButtonChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="5.0 L"/>
+    </com.google.android.material.chip.ChipGroup>
 
     <Button
         android:id="@+id/buttonAddItemDialog"
@@ -63,28 +84,25 @@
         android:layout_gravity="end"
         android:hapticFeedbackEnabled="true"
         android:text="Adicionar Item" />
-
     <TextView
         android:id="@+id/textViewCurrentBatchTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Itens nesta batida:"
+        android:textStyle="bold"
         android:textColor="@color/black" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCurrentBatchDialog"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_marginVertical="8dp"
         android:background="#F5F5F5" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:orientation="horizontal">
-
         <Button
             android:id="@+id/buttonCancelDialog"
             style="?android:attr/buttonBarButtonStyle"
@@ -94,7 +112,6 @@
             android:layout_weight="1"
             android:text="Cancelar"
             android:textColor="@android:color/black" />
-
         <Button
             android:id="@+id/buttonSaveBatchDialog"
             style="?android:attr/buttonBarButtonStyle"
@@ -105,5 +122,4 @@
             android:text="Salvar Batida"
             android:textColor="@android:color/black" />
     </LinearLayout>
-
 </LinearLayout>

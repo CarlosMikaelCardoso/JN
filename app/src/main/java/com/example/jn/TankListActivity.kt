@@ -25,6 +25,10 @@ import java.util.Calendar
 import java.util.Locale
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.button.MaterialButtonToggleGroup
+
 
 class TankListActivity : AppCompatActivity() {
 
@@ -45,6 +49,7 @@ class TankListActivity : AppCompatActivity() {
     // --- Dados ---
     private val summaryRows = mutableListOf<Pair<AcaiTypeSummary, View>>()
     private var lastCalculatedRevenue: Double = 0.0
+    private var isCurrentDayModifiable: Boolean = false
 
     data class AcaiTypeSummary(val type: String, val totalLiters: Double)
 
@@ -55,12 +60,12 @@ class TankListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         initializeViews()
         showLoading(true)
+        setupTankListView()
+        setupDeliveryListView()
         TankManager.loadInitialData {
             runOnUiThread {
-                setupTankListView()
-                setupDeliveryListView()
+                updateUiForDate()
                 setupBottomNavigation()
-                supportActionBar?.title = "Dia Ativo: ${TankManager.getActiveDay()}"
                 showLoading(false, R.id.navigation_tanks)
             }
         }
@@ -69,10 +74,7 @@ class TankListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (::tankAdapter.isInitialized) {
-            tankAdapter.updateData(TankManager.getTanks())
-        }
-        if (::deliveryAdapter.isInitialized && deliveriesContentLayout.visibility == View.VISIBLE) {
-            loadDeliveriesForActiveDay()
+            updateUiForDate()
         }
     }
 
@@ -80,6 +82,13 @@ class TankListActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val endDayItem = menu.findItem(R.id.action_end_day)
+        endDayItem.isVisible = isCurrentDayModifiable
+        return super.onPrepareOptionsMenu(menu)
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -90,6 +99,27 @@ class TankListActivity : AppCompatActivity() {
                 showDatePickerDialog(); true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun updateUiForDate() {
+        val realActiveDay = TankManager.getRealActiveDay()
+        val currentlyViewedDay = TankManager.getActiveDay()
+
+        // A lógica de comparação agora é perfeita
+        isCurrentDayModifiable = (realActiveDay == currentlyViewedDay)
+        supportActionBar?.title = "Dia: $currentlyViewedDay"
+
+        fabAdd.visibility = if (isCurrentDayModifiable) View.VISIBLE else View.GONE
+        invalidateOptionsMenu()
+
+        tankAdapter.updateData(TankManager.getTanks())
+        deliveryAdapter.setModifiable(isCurrentDayModifiable)
+
+        val selectedId = findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId
+        when (selectedId) {
+            R.id.navigation_deliveries -> loadDeliveriesForActiveDay()
+            R.id.navigation_summary -> setupSummaryView()
         }
     }
 
@@ -123,6 +153,7 @@ class TankListActivity : AppCompatActivity() {
         tankAdapter = TankAdapter(emptyList()) { tank ->
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("TANK_ID", tank.id)
+            intent.putExtra("IS_MODIFIABLE", isCurrentDayModifiable)
             startActivity(intent)
         }
         recyclerViewTanks.adapter = tankAdapter
@@ -131,7 +162,11 @@ class TankListActivity : AppCompatActivity() {
 
     private fun setupDeliveryListView() {
         deliveryAdapter = DeliveryAdapter(mutableListOf()) { delivery ->
-            showAddDeliveryDialog(delivery)
+            if(isCurrentDayModifiable) {
+                showAddDeliveryDialog(delivery)
+            } else {
+                Toast.makeText(this, "Não é possível editar entregas de dias anteriores.", Toast.LENGTH_SHORT).show()
+            }
         }
         recyclerViewDeliveries.adapter = deliveryAdapter
         recyclerViewDeliveries.layoutManager = LinearLayoutManager(this)
@@ -147,7 +182,7 @@ class TankListActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { item ->
-            fabAdd.visibility = View.VISIBLE
+            updateUiForDate()
             when (item.itemId) {
                 R.id.navigation_tanks -> {
                     showLoading(false, R.id.navigation_tanks)
@@ -180,7 +215,7 @@ class TankListActivity : AppCompatActivity() {
                     showLoading(true)
                     TankManager.addNewTank {
                         runOnUiThread {
-                            tankAdapter.updateData(TankManager.getTanks())
+                            updateUiForDate()
                             showLoading(false, R.id.navigation_tanks)
                         }
                     }
@@ -193,6 +228,11 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun showAddDeliveryDialog(deliveryToEdit: Delivery? = null) {
+        if (!isCurrentDayModifiable && deliveryToEdit == null) {
+            Toast.makeText(this, "Não é possível adicionar entregas em dias anteriores.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_delivery, null)
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
@@ -251,7 +291,6 @@ class TankListActivity : AppCompatActivity() {
                 return@setPositiveButton
             }
 
-            // MUDANÇA: Preservando o status 'finished'
             val delivery = Delivery(
                 id = deliveryToEdit?.id ?: "",
                 clientName = clientName,
@@ -307,27 +346,27 @@ class TankListActivity : AppCompatActivity() {
             .setView(subDialogView)
             .setTitle("Adicionar Item de Açaí")
 
-        val spinnerTipo: Spinner = subDialogView.findViewById(R.id.spinnerTipoAcaiDialog)
-        val spinnerQuantidade: Spinner = subDialogView.findViewById(R.id.spinnerQuantidadeAcaiDialog)
+        // Usando ChipGroup, que corresponde ao layout final
+        val chipGroupTipo: ChipGroup = subDialogView.findViewById(R.id.chipGroupTipoAcai)
+        val chipGroupQuantidade: ChipGroup = subDialogView.findViewById(R.id.chipGroupQuantidade)
         val btnAddItem: Button = subDialogView.findViewById(R.id.buttonAddItemDialog)
-
-        val tipos = TankManager.getAcaiTypes().toTypedArray()
-        val quantidades = arrayOf("0.5 L", "1.0 L", "1.5 L", "2.0 L", "2.5 L", "3.0 L", "3.5 L", "4.0 L", "4.5 L", "5.0 L")
-
-        val tipoAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tipos)
-        tipoAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
-        spinnerTipo.adapter = tipoAdapter
-
-        val quantidadeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, quantidades)
-        quantidadeAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
-        spinnerQuantidade.adapter = quantidadeAdapter
 
         val dialog = builder.create()
 
         btnAddItem.text = "Adicionar ao Pedido"
         btnAddItem.setOnClickListener {
-            val tipo = spinnerTipo.selectedItem.toString()
-            val quantidadeStr = spinnerQuantidade.selectedItem.toString()
+            val selectedTipoId = chipGroupTipo.checkedChipId
+            val selectedQuantidadeId = chipGroupQuantidade.checkedChipId
+
+            if (selectedTipoId == View.NO_ID || selectedQuantidadeId == View.NO_ID) {
+                Toast.makeText(this, "Por favor, selecione um tipo e uma quantidade.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val chipTipo = subDialogView.findViewById<Chip>(selectedTipoId)
+            val chipQuantidade = subDialogView.findViewById<Chip>(selectedQuantidadeId)
+            val tipo = chipTipo.text.toString()
+            val quantidadeStr = chipQuantidade.text.toString()
             val quantidade = quantidadeStr.replace(" L", "").toDoubleOrNull()
 
             if (quantidade != null && quantidade > 0) {
@@ -389,7 +428,9 @@ class TankListActivity : AppCompatActivity() {
     }
 
     private fun showEndDayConfirmationDialog() {
+        calculateFinalRevenue()
         val totalRevenue = lastCalculatedRevenue
+
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Confirmar Encerramento do Dia")
         builder.setMessage("O faturamento total calculado foi de ${formatCurrency(totalRevenue)}.\n\nTem certeza que deseja encerrar o dia? Esta ação não pode ser desfeita.")
@@ -399,8 +440,7 @@ class TankListActivity : AppCompatActivity() {
                 runOnUiThread {
                     val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
                     bottomNav.selectedItemId = R.id.navigation_tanks
-                    tankAdapter.updateData(TankManager.getTanks())
-                    supportActionBar?.title = "Dia Ativo: ${TankManager.getActiveDay()}"
+                    updateUiForDate()
                     showLoading(false, R.id.navigation_tanks)
                 }
             }
@@ -415,33 +455,33 @@ class TankListActivity : AppCompatActivity() {
         val year = parts[0].toInt()
         val month = parts[1].toInt() - 1
         val day = parts[2].toInt()
+
         val datePickerDialog = DatePickerDialog(
             this,
             { _, newYear, newMonth, newDay ->
                 val newDate = String.format("%04d-%02d-%02d", newYear, newMonth + 1, newDay)
-                changeActiveDay(newDate)
+                if (newDate != TankManager.getActiveDay()) {
+                    changeViewedDay(newDate) // Nome da função corrigido
+                }
             },
             year,
             month,
             day
         )
+        datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
         datePickerDialog.show()
     }
 
-    private fun changeActiveDay(newDate: String) {
+    // ##### FUNÇÃO ATUALIZADA #####
+    // Agora chama a nova função do TankManager e não mexe mais com o Firebase diretamente.
+    private fun changeViewedDay(newDate: String) {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
         val selectedId = bottomNav.selectedItemId
         showLoading(true)
-        FirebaseManager.updateActiveDay(newDate)
-        TankManager.loadInitialData {
+
+        TankManager.changeViewedDay(newDate) {
             runOnUiThread {
-                tankAdapter.updateData(TankManager.getTanks())
-                supportActionBar?.title = "Dia Ativo: $newDate"
-                if (selectedId == R.id.navigation_summary) {
-                    setupSummaryView()
-                } else if (selectedId == R.id.navigation_deliveries) {
-                    loadDeliveriesForActiveDay()
-                }
+                updateUiForDate()
                 showLoading(false, selectedId)
             }
         }

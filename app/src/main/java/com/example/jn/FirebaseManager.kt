@@ -36,9 +36,21 @@ object FirebaseManager {
             .addOnFailureListener { onComplete(null) }
     }
 
-    fun updateActiveDay(newDate: String) {
+    // ##### MUDANÇA AQUI #####
+    // A função agora aceita um segundo argumento: onComplete: () -> Unit.
+    // Este é o bloco de código que será executado após a atualização no Firebase.
+    fun updateActiveDay(newDate: String, onComplete: () -> Unit) {
         statusDocument.update("diaAtivo", newDate)
+            .addOnSuccessListener {
+                // Sucesso! Agora podemos chamar o onComplete.
+                onComplete()
+            }
+            .addOnFailureListener {
+                // Em caso de falha, também chamamos para não travar o app.
+                onComplete()
+            }
     }
+
 
     // --- Funções de Tanque (sem alteração) ---
     fun loadTanks(onDataLoaded: (List<Tank>) -> Unit) {

@@ -1,4 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.JN" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.JN" parent="Theme.MaterialComponents.Light.NoActionBar" />
+
+    <style name="Widget.App.ButtonChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/button_chip_background_color</item>
+        <item name="android:textColor">@color/button_chip_text_color</item>
+        <item name="chipStrokeColor">?attr/colorPrimary</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="checkedIconVisible">false</item>
+
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
 </resources>

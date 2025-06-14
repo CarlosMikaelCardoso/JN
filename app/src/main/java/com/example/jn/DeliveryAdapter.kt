@@ -17,6 +17,14 @@ class DeliveryAdapter(
     private val onItemClick: (Delivery) -> Unit
 ) : RecyclerView.Adapter<DeliveryAdapter.DeliveryViewHolder>() {
 
+    // Nova variável para controlar a modificação
+    private var isModifiable: Boolean = true
+
+    // Nova função para a Activity poder atualizar este estado
+    fun setModifiable(isModifiable: Boolean) {
+        this.isModifiable = isModifiable
+    }
+
     class DeliveryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val clientName: TextView = view.findViewById(R.id.textViewClientName)
         val address: TextView = view.findViewById(R.id.textViewAddress)
@@ -60,33 +68,40 @@ class DeliveryAdapter(
             holder.observation.visibility = View.GONE
         }
 
-        // MUDANÇA: Usando 'delivery.finished'
+        // Lógica de bloqueio
         if (delivery.finished) {
             holder.markAsFinishedButton.visibility = View.GONE
             holder.layout.setBackgroundColor(Color.parseColor("#C8C8C8"))
             holder.itemView.setOnClickListener(null)
         } else {
-            holder.markAsFinishedButton.visibility = View.VISIBLE
-            holder.layout.background = ContextCompat.getDrawable(holder.itemView.context, R.drawable.item_background)
-            holder.itemView.setOnClickListener { onItemClick(delivery) }
+            // Apenas mostra o botão e permite cliques se o dia for modificável
+            if (isModifiable) {
+                holder.markAsFinishedButton.visibility = View.VISIBLE
+                holder.layout.background = ContextCompat.getDrawable(holder.itemView.context, R.drawable.item_background)
+                holder.itemView.setOnClickListener { onItemClick(delivery) }
 
-            holder.markAsFinishedButton.setOnClickListener {
-                AlertDialog.Builder(holder.itemView.context)
-                    .setTitle("Confirmar Entrega")
-                    .setMessage("Tem certeza que deseja marcar este pedido como entregue?")
-                    .setPositiveButton("Sim, Entregue") { dialog, _ ->
-                        markDeliveryAsFinished(delivery, position)
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton("Não", null)
-                    .setIcon(android.R.drawable.ic_dialog_info)
-                    .show()
+                holder.markAsFinishedButton.setOnClickListener {
+                    AlertDialog.Builder(holder.itemView.context)
+                        .setTitle("Confirmar Entrega")
+                        .setMessage("Tem certeza que deseja marcar este pedido como entregue?")
+                        .setPositiveButton("Sim, Entregue") { dialog, _ ->
+                            markDeliveryAsFinished(delivery, position)
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("Não", null)
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .show()
+                }
+            } else {
+                // Em dias passados, esconde o botão e desativa o clique
+                holder.markAsFinishedButton.visibility = View.GONE
+                holder.itemView.setOnClickListener(null)
+                holder.layout.background = ContextCompat.getDrawable(holder.itemView.context, R.drawable.item_background)
             }
         }
     }
 
     private fun markDeliveryAsFinished(delivery: Delivery, position: Int) {
-        // MUDANÇA: Usando 'copy(finished = true)'
         val updatedDelivery = delivery.copy(finished = true)
 
         FirebaseManager.updateDelivery(updatedDelivery) { success ->
