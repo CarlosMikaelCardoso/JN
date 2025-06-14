@@ -12,6 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:textColor="@color/black"
         android:text="Açaí Tradicional: 10.5 L"
         android:textSize="16sp"/>
 
@@ -29,6 +30,7 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="R$ 0.00"
+        android:textColor="#078C4C"
         android:gravity="end"
         android:textSize="16sp"
         android:textStyle="bold"/>

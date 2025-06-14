@@ -23,7 +23,7 @@ class HistoryAdapter(private val batidas: List<Batida>) :
         val batida = batidas[position]
 
         // Constrói a string com todos os itens da batida
-        val itemsString = batida.items.joinToString(separator = "; ") { output ->
+        val itemsString = batida.items.joinToString(separator = " / ") { output ->
             "%.1f L de %s".format(output.quantity, output.type)
         }
 

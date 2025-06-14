@@ -106,17 +106,30 @@ class TankListActivity : AppCompatActivity() {
         val realActiveDay = TankManager.getRealActiveDay()
         val currentlyViewedDay = TankManager.getActiveDay()
 
-        // A lógica de comparação agora é perfeita
-        isCurrentDayModifiable = (realActiveDay == currentlyViewedDay)
+        // --- LÓGICA CORRIGIDA AQUI ---
+        // Comparamos as strings de data. Se o dia visualizado for maior ou igual
+        // ao dia real, ele pode ser modificado.
+        isCurrentDayModifiable = currentlyViewedDay >= realActiveDay
+        // -----------------------------
+
         supportActionBar?.title = "Dia: $currentlyViewedDay"
 
-        fabAdd.visibility = if (isCurrentDayModifiable) View.VISIBLE else View.GONE
+        // O FAB de adicionar (tanque ou entrega) só aparece se o dia for modificável.
+        val selectedId = findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId
+        if (isCurrentDayModifiable && (selectedId == R.id.navigation_tanks || selectedId == R.id.navigation_deliveries)) {
+            fabAdd.visibility = View.VISIBLE
+        } else {
+            fabAdd.visibility = View.GONE
+        }
+
+        // Atualiza o menu da toolbar (botão de "Encerrar Dia")
         invalidateOptionsMenu()
 
+        // Atualiza os adaptadores com a permissão de modificação correta
         tankAdapter.updateData(TankManager.getTanks())
         deliveryAdapter.setModifiable(isCurrentDayModifiable)
 
-        val selectedId = findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId
+        // Recarrega os dados da aba atual (especialmente entregas)
         when (selectedId) {
             R.id.navigation_deliveries -> loadDeliveriesForActiveDay()
             R.id.navigation_summary -> setupSummaryView()
@@ -486,4 +499,6 @@ class TankListActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }

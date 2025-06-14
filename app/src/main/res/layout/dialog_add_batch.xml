@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="15dp">
 
     <TextView
         android:id="@+id/textViewBatida"
@@ -105,21 +105,20 @@
         android:orientation="horizontal">
         <Button
             android:id="@+id/buttonCancelDialog"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Cancelar"
-            android:textColor="@android:color/black" />
+            android:backgroundTint="#078C4C"
+            android:textColor="@android:color/white" />
         <Button
             android:id="@+id/buttonSaveBatchDialog"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hapticFeedbackEnabled="true"
             android:text="Salvar Batida"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/white" />
     </LinearLayout>
 </LinearLayout>

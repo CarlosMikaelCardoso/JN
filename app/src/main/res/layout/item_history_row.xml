@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/textViewHistoryItem"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textSize="24sp"
-    android:paddingVertical="8dp"
-    android:paddingHorizontal="16dp"
-    android:text="• 1.5 L de Açaí Tradicional"
-    android:textColor="@android:color/black"
-    android:fitsSystemWindows="true"/>
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    android:background="@drawable/item_background">
+
+    <TextView
+        android:id="@+id/textViewHistoryItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1ª Batida: 5.0 L de Açaí Médio"
+        android:textSize="18sp"
+        android:textColor="@android:color/black" />
+
+</LinearLayout>
